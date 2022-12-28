@@ -108,12 +108,55 @@ namespace FundooRepository.Repository
                 }
             }
         }
+        public UpdateNoteModel UpdateNotes(UpdateNoteModel updateNote, int userID, int noteID)
+        {
+            SqlConnection connection = new SqlConnection(connectionString);
+            try
+            {
+                using (connection)
+                {
+                    SqlCommand command = new SqlCommand("SPUpdateNote", connection);
+
+                    command.CommandType = CommandType.StoredProcedure;
+                    command.Parameters.AddWithValue("@UserID", userID);
+                    command.Parameters.AddWithValue("@NoteID", noteID);
+                    command.Parameters.AddWithValue("@Title", updateNote.Title);
+                    command.Parameters.AddWithValue("@Description", updateNote.Description);
+                    command.Parameters.AddWithValue("@Reminder", updateNote.Reminder);
+                    command.Parameters.AddWithValue("@Color", updateNote.Color);
+                    command.Parameters.AddWithValue("@Image", updateNote.Image);
+                    command.Parameters.AddWithValue("@Archive", updateNote.Archive);
+                    command.Parameters.AddWithValue("@PinNotes", updateNote.PinNotes);
+                    command.Parameters.AddWithValue("@Trash", updateNote.Trash);
+                    command.Parameters.AddWithValue("@Modified", DateTime.UtcNow);
+
+                    connection.Open();
+                    int deleteOrNot = command.ExecuteNonQuery();
+
+                    if (deleteOrNot >= 1)
+                    {
+                        return updateNote;
+                    }
+                    return null;
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+            finally
+            {
+                if (connection.State == ConnectionState.Open)
+                {
+                    connection.Close();
+                }
+            }
+        }
         public bool DeleteNote(int userID, int noteID)
         {
             SqlConnection connection = new SqlConnection(connectionString);
             try
             {
-                NoteModel noteModel = new NoteModel();
                 using (connection)
                 {
                     SqlCommand command = new SqlCommand("SPDeleteNote", connection);

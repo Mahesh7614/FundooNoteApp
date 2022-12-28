@@ -34,5 +34,27 @@ namespace FundooManager.Manager
                 throw new Exception(ex.Message);
             }
         }
+        public UpdateNoteModel UpdateNotes(UpdateNoteModel updateNote, int userID, int noteID)
+        {
+            try
+            {
+                return this.notesRepository.UpdateNotes(updateNote, userID, noteID);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+        public bool DeleteNote(int userID, int noteID)
+        {
+            try
+            {
+                return this.notesRepository.DeleteNote(userID, noteID);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
     }
 }
