@@ -109,5 +109,41 @@ namespace FundooRepository.Repository
                 }
             }
         }
+        public bool DeleteNote(int userID, int noteID)
+        {
+            SqlConnection connection = new SqlConnection(connectionString);
+            try
+            {
+                NoteModel noteModel = new NoteModel();
+                using (connection)
+                {
+                    SqlCommand command = new SqlCommand("SPDeleteNote", connection);
+
+                    command.CommandType = CommandType.StoredProcedure;
+                    command.Parameters.AddWithValue("@UserID", userID);
+                    command.Parameters.AddWithValue("@NoteID", noteID);
+
+                    connection.Open();
+                    int deleteOrNot = command.ExecuteNonQuery();
+
+                    if (deleteOrNot >= 1)
+                    {
+                        return true;
+                    }
+                    return false;
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+            finally
+            {
+                if (connection.State == ConnectionState.Open)
+                {
+                    connection.Close();
+                }
+            }
+        }
     }
 }
