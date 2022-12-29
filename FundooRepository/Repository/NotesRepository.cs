@@ -14,7 +14,7 @@ namespace FundooRepository.Repository
         {
             connectionString = configuration.GetConnectionString("UserDBConnection");
         }
-        public NoteModel CreateNotes(NoteModel noteModel, int userID)
+        public NoteCreateModel CreateNotes(NoteCreateModel notecreateModel, int userID)
         {
             SqlConnection connection = new SqlConnection(connectionString);
             try
@@ -24,16 +24,16 @@ namespace FundooRepository.Repository
                     SqlCommand command = new SqlCommand("SPCreateNote", connection);
 
                     command.CommandType = CommandType.StoredProcedure;
-                    command.Parameters.AddWithValue("@Title", noteModel.Title);
-                    command.Parameters.AddWithValue("@Description", noteModel.Description);
-                    command.Parameters.AddWithValue("@Reminder", noteModel.Reminder);
-                    command.Parameters.AddWithValue("@Color", noteModel.Color);
-                    command.Parameters.AddWithValue("@Image", noteModel.Image);
-                    command.Parameters.AddWithValue("@Archive", noteModel.Archive);
-                    command.Parameters.AddWithValue("@PinNotes", noteModel.PinNotes);
-                    command.Parameters.AddWithValue("@Trash", noteModel.Trash);
-                    command.Parameters.AddWithValue("@Created", noteModel.Created);
-                    command.Parameters.AddWithValue("@Modified", noteModel.Modified);
+                    command.Parameters.AddWithValue("@Title", notecreateModel.Title);
+                    command.Parameters.AddWithValue("@Description", notecreateModel.Description);
+                    command.Parameters.AddWithValue("@Reminder", notecreateModel.Reminder);
+                    command.Parameters.AddWithValue("@Color", notecreateModel.Color);
+                    command.Parameters.AddWithValue("@Image", notecreateModel.Image);
+                    command.Parameters.AddWithValue("@Archive", notecreateModel.Archive);
+                    command.Parameters.AddWithValue("@PinNotes", notecreateModel.PinNotes);
+                    command.Parameters.AddWithValue("@Trash", notecreateModel.Trash);
+                    command.Parameters.AddWithValue("@Created", DateTime.Now);
+                    command.Parameters.AddWithValue("@Modified", DateTime.Now);
                     command.Parameters.AddWithValue("@UserID", userID);
 
                     connection.Open();
@@ -41,7 +41,7 @@ namespace FundooRepository.Repository
 
                     if (registerOrNot >= 1)
                     {
-                        return noteModel;
+                        return notecreateModel;
                     }
                     return null;
                 }
@@ -58,12 +58,12 @@ namespace FundooRepository.Repository
                 }
             }
         }
-        public NoteModel DisplayNotes(int userID)
+        public List<NoteModel> DisplayNotes(int userID)
         {
             SqlConnection connection = new SqlConnection(connectionString);
             try
             {
-                NoteModel noteModel = new NoteModel();
+                List<NoteModel> listNote = new List<NoteModel>();
                 using (connection)
                 {
                     SqlCommand command = new SqlCommand("SPGetNotes", connection);
@@ -78,20 +78,24 @@ namespace FundooRepository.Repository
                     {
                         while (Reader.Read())
                         {
-                            noteModel.NoteID = Reader.IsDBNull("NoteID") ? 0 : Reader.GetInt32("NoteID");
-                            noteModel.UserID = Reader.IsDBNull("UserID") ? 0 : Reader.GetInt32("UserID");
-                            noteModel.Title = Reader.IsDBNull("Title") ? string.Empty : Reader.GetString("Title");
-                            noteModel.Description = Reader.IsDBNull("Description") ? string.Empty : Reader.GetString("Description");
-                            noteModel.Reminder = Reader.IsDBNull("Reminder") ? DateTime.MinValue : Reader.GetDateTime("Reminder");
-                            noteModel.Color = Reader.IsDBNull("Color") ? string.Empty : Reader.GetString("Color");
-                            noteModel.Image = Reader.IsDBNull("Image") ? string.Empty : Reader.GetString("Image");
-                            noteModel.Archive = Reader.IsDBNull("Archive") ? false : Reader.GetBoolean("Archive");
-                            noteModel.PinNotes = Reader.IsDBNull("PinNotes") ? false : Reader.GetBoolean("PinNotes");
-                            noteModel.Trash = Reader.IsDBNull("Trash") ? false : Reader.GetBoolean("Archive");
-                            noteModel.Created = Reader.IsDBNull("Created") ? DateTime.MinValue : Reader.GetDateTime("Created");
-                            noteModel.Modified = Reader.IsDBNull("Modified") ? DateTime.MinValue : Reader.GetDateTime("Modified");
+                            NoteModel noteModel = new NoteModel()
+                            {
+                                NoteID = Reader.IsDBNull("NoteID") ? 0 : Reader.GetInt32("NoteID"),
+                                UserID = Reader.IsDBNull("UserID") ? 0 : Reader.GetInt32("UserID"),
+                                Title = Reader.IsDBNull("Title") ? string.Empty : Reader.GetString("Title"),
+                                Description = Reader.IsDBNull("Description") ? string.Empty : Reader.GetString("Description"),
+                                Reminder = Reader.IsDBNull("Reminder") ? DateTime.MinValue : Reader.GetDateTime("Reminder"),
+                                Color = Reader.IsDBNull("Color") ? string.Empty : Reader.GetString("Color"),
+                                Image = Reader.IsDBNull("Image") ? string.Empty : Reader.GetString("Image"),
+                                Archive = Reader.IsDBNull("Archive") ? false : Reader.GetBoolean("Archive"),
+                                PinNotes = Reader.IsDBNull("PinNotes") ? false : Reader.GetBoolean("PinNotes"),
+                                Trash = Reader.IsDBNull("Trash") ? false : Reader.GetBoolean("Archive"),
+                                Created = Reader.IsDBNull("Created") ? DateTime.MinValue : Reader.GetDateTime("Created"),
+                                Modified = Reader.IsDBNull("Modified") ? DateTime.MinValue : Reader.GetDateTime("Modified"),
+                            };
+                            listNote.Add(noteModel);
                         }
-                        return noteModel;
+                        return listNote;
                     }
                     return null;
                 }
@@ -128,7 +132,7 @@ namespace FundooRepository.Repository
                     command.Parameters.AddWithValue("@Archive", updateNote.Archive);
                     command.Parameters.AddWithValue("@PinNotes", updateNote.PinNotes);
                     command.Parameters.AddWithValue("@Trash", updateNote.Trash);
-                    command.Parameters.AddWithValue("@Modified", DateTime.UtcNow);
+                    command.Parameters.AddWithValue("@Modified", DateTime.Now);
 
                     connection.Open();
                     int deleteOrNot = command.ExecuteNonQuery();
@@ -164,6 +168,114 @@ namespace FundooRepository.Repository
                     command.CommandType = CommandType.StoredProcedure;
                     command.Parameters.AddWithValue("@UserID", userID);
                     command.Parameters.AddWithValue("@NoteID", noteID);
+
+                    connection.Open();
+                    int deleteOrNot = command.ExecuteNonQuery();
+
+                    if (deleteOrNot >= 1)
+                    {
+                        return true;
+                    }
+                    return false;
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+            finally
+            {
+                if (connection.State == ConnectionState.Open)
+                {
+                    connection.Close();
+                }
+            }
+        }
+        public bool PinNote(bool pinNote, int userID, int noteID)
+        {
+            SqlConnection connection = new SqlConnection(connectionString);
+            try
+            {
+                using (connection)
+                {
+                    SqlCommand command = new SqlCommand("SPPinNotes", connection);
+
+                    command.CommandType = CommandType.StoredProcedure;
+                    command.Parameters.AddWithValue("@UserID", userID);
+                    command.Parameters.AddWithValue("@NoteID", noteID);
+                    command.Parameters.AddWithValue("@PinNotes", pinNote);
+
+                    connection.Open();
+                    int deleteOrNot = command.ExecuteNonQuery();
+
+                    if (deleteOrNot >= 1)
+                    {
+                        return true;
+                    }
+                    return false;
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+            finally
+            {
+                if (connection.State == ConnectionState.Open)
+                {
+                    connection.Close();
+                }
+            }
+        }
+        public bool ArchiveNote(bool archiveNote, int userID, int noteID)
+        {
+            SqlConnection connection = new SqlConnection(connectionString);
+            try
+            {
+                using (connection)
+                {
+                    SqlCommand command = new SqlCommand("SPArchiveNote", connection);
+
+                    command.CommandType = CommandType.StoredProcedure;
+                    command.Parameters.AddWithValue("@UserID", userID);
+                    command.Parameters.AddWithValue("@NoteID", noteID);
+                    command.Parameters.AddWithValue("@Archive", archiveNote);
+
+                    connection.Open();
+                    int deleteOrNot = command.ExecuteNonQuery();
+
+                    if (deleteOrNot >= 1)
+                    {
+                        return true;
+                    }
+                    return false;
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+            finally
+            {
+                if (connection.State == ConnectionState.Open)
+                {
+                    connection.Close();
+                }
+            }
+        }
+        public bool TrashNote(bool trashNote, int userID, int noteID)
+        {
+            SqlConnection connection = new SqlConnection(connectionString);
+            try
+            {
+                using (connection)
+                {
+                    SqlCommand command = new SqlCommand("SPTrashNote", connection);
+
+                    command.CommandType = CommandType.StoredProcedure;
+                    command.Parameters.AddWithValue("@UserID", userID);
+                    command.Parameters.AddWithValue("@NoteID", noteID);
+                    command.Parameters.AddWithValue("@Trash", trashNote);
 
                     connection.Open();
                     int deleteOrNot = command.ExecuteNonQuery();

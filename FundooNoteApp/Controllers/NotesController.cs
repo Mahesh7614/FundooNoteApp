@@ -18,17 +18,17 @@ namespace FundooNoteApp.Controllers
         }
         [HttpPost]
         [Route("createnotes")]
-        public IActionResult CreateNotes(NoteModel noteModel)
+        public IActionResult CreateNotes(NoteCreateModel notecreateModel)
         {
             try
             {
                 int UserID = Convert.ToInt32(User.FindFirst("UserID").Value);
-                NoteModel NotesData = this.notesManager.CreateNotes(noteModel, UserID);
+                NoteCreateModel NotesData = this.notesManager.CreateNotes(notecreateModel, UserID);
                 if (NotesData != null)
                 {
                     return this.Ok(new { success = true, message = "Note Created Successfully", result = NotesData });
                 }
-                return this.Ok(new { success = true, message = "Note Title Already Exists" });
+                return this.Ok(new { success = true, message = "Note not Created" });
             }
             catch (Exception ex)
             {
@@ -42,7 +42,7 @@ namespace FundooNoteApp.Controllers
             try
             {
                 int UserID = Convert.ToInt32(User.FindFirst("UserID").Value);
-                NoteModel NotesData = this.notesManager.DisplayNotes(UserID);
+                List<NoteModel> NotesData = this.notesManager.DisplayNotes(UserID);
                 if (NotesData != null)
                 {
                     return this.Ok(new { success = true, message = "Display Notes Successfully", result = NotesData });
@@ -86,6 +86,63 @@ namespace FundooNoteApp.Controllers
                     return this.Ok(new { success = true, message = "Delete Note Successfully", result = deleteNote });
                 }
                 return this.Ok(new { success = true, message = "Note Not Deleted" });
+            }
+            catch (Exception ex)
+            {
+                return this.BadRequest(new { success = false, message = ex.Message });
+            }
+        }
+        [HttpPut]
+        [Route("pinnote")]
+        public IActionResult PinNote(bool pinNote, int noteID)
+        {
+            try
+            {
+                int UserID = Convert.ToInt32(User.FindFirst("UserID").Value);
+                bool pin = this.notesManager.PinNote(pinNote, UserID, noteID);
+                if (pin)
+                {
+                    return this.Ok(new { success = true, message = "PinNote Operation is Successfull", result = pin });
+                }
+                return this.Ok(new { success = true, message = "Pin Operation is Unsuccessfull" });
+            }
+            catch (Exception ex)
+            {
+                return this.BadRequest(new { success = false, message = ex.Message });
+            }
+        }
+        [HttpPut]
+        [Route("archivenote")]
+        public IActionResult ArchiveNote(bool archiveNote, int noteID)
+        {
+            try
+            {
+                int UserID = Convert.ToInt32(User.FindFirst("UserID").Value);
+                bool archive = this.notesManager.ArchiveNote(archiveNote, UserID, noteID);
+                if (archive)
+                {
+                    return this.Ok(new { success = true, message = "Archive Operation is Successfull", result = archive });
+                }
+                return this.Ok(new { success = true, message = "Archive Operation is Unsuccessfull" });
+            }
+            catch (Exception ex)
+            {
+                return this.BadRequest(new { success = false, message = ex.Message });
+            }
+        }
+        [HttpPut]
+        [Route("trashnote")]
+        public IActionResult TrashNote(bool trashNote, int noteID)
+        {
+            try
+            {
+                int UserID = Convert.ToInt32(User.FindFirst("UserID").Value);
+                bool trash = this.notesManager.TrashNote(trashNote, UserID, noteID);
+                if (trash)
+                {
+                    return this.Ok(new { success = true, message = "Trash Operation is Successfull", result = trash });
+                }
+                return this.Ok(new { success = true, message = "Trash Operation is Unsuccessfull" });
             }
             catch (Exception ex)
             {

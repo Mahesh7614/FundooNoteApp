@@ -12,18 +12,18 @@ namespace FundooManager.Manager
         {
             this.notesRepository = notesRepository;
         }
-        public NoteModel CreateNotes(NoteModel noteModel, int userID)
+        public NoteCreateModel CreateNotes(NoteCreateModel notecreateModel, int userID)
         {
             try
             {
-                return this.notesRepository.CreateNotes(noteModel, userID);
+                return this.notesRepository.CreateNotes(notecreateModel, userID);
             }
             catch (Exception ex)
             {
                 throw new Exception(ex.Message);
             }
         }
-        public NoteModel DisplayNotes(int userID)
+        public List<NoteModel> DisplayNotes(int userID)
         {
             try
             {
@@ -50,6 +50,39 @@ namespace FundooManager.Manager
             try
             {
                 return this.notesRepository.DeleteNote(userID, noteID);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+        public bool PinNote(bool pinNote, int userID, int noteID)
+        {
+            try
+            {
+                return this.notesRepository.PinNote(pinNote, userID, noteID);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+        public bool ArchiveNote(bool archiveNote, int userID, int noteID)
+        {
+            try
+            {
+                return this.notesRepository.ArchiveNote(archiveNote, userID, noteID);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+        public bool TrashNote(bool trashNote, int userID, int noteID)
+        {
+            try
+            {
+                return this.notesRepository.TrashNote(trashNote, userID, noteID);
             }
             catch (Exception ex)
             {

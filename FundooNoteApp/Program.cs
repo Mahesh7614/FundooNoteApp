@@ -34,7 +34,7 @@ namespace FundooNoteApp
                     Name = "JWT Authentication",
                     In = ParameterLocation.Header,
                     Type = SecuritySchemeType.Http,
-                    Description = "enter JWT Bearer token on textbox below!",
+                    Description = "Enter JWT Bearer Token in Textbox For Authorization",
 
                     Reference = new OpenApiReference
                     {
