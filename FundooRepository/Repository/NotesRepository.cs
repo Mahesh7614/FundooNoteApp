@@ -299,6 +299,77 @@ namespace FundooRepository.Repository
                 }
             }
         }
+        public bool Color(string color, int userID, int noteID)
+        {
+            SqlConnection connection = new SqlConnection(connectionString);
+            try
+            {
+                using (connection)
+                {
+                    SqlCommand command = new SqlCommand("SPColor", connection);
+
+                    command.CommandType = CommandType.StoredProcedure;
+                    command.Parameters.AddWithValue("@UserID", userID);
+                    command.Parameters.AddWithValue("@NoteID", noteID);
+                    command.Parameters.AddWithValue("@Color", color);
+
+                    connection.Open();
+                    int deleteOrNot = command.ExecuteNonQuery();
+
+                    if (deleteOrNot >= 1)
+                    {
+                        return true;
+                    }
+                    return false;
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+            finally
+            {
+                if (connection.State == ConnectionState.Open)
+                {
+                    connection.Close();
+                }
+            }
+        }
+        public bool Remainder(DateTime remainder, int userID, int noteID)
+        {
+            SqlConnection connection = new SqlConnection(connectionString);
+            try
+            {
+                using (connection)
+                {
+                    SqlCommand command = new SqlCommand("SPReminder", connection);
+
+                    command.CommandType = CommandType.StoredProcedure;
+                    command.Parameters.AddWithValue("@UserID", userID);
+                    command.Parameters.AddWithValue("@NoteID", noteID);
+                    command.Parameters.AddWithValue("@Reminder", remainder);
+
+                    connection.Open();
+                    int deleteOrNot = command.ExecuteNonQuery();
+
+                    if (deleteOrNot >= 1)
+                    {
+                        return true;
+                    }
+                    return false;
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+            finally
+            {
+                if (connection.State == ConnectionState.Open)
+                {
+                    connection.Close();
+                }
+            }
+        }
     }
 }
-
