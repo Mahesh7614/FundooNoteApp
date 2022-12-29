@@ -89,5 +89,27 @@ namespace FundooManager.Manager
                 throw new Exception(ex.Message);
             }
         }
+        public bool Color(string color, int userID, int noteID)
+        {
+            try
+            {
+                return this.notesRepository.Color(color, userID, noteID);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+        public bool Remainder(DateTime remainder, int userID, int noteID)
+        {
+            try
+            {
+                return this.notesRepository.Remainder(remainder, userID, noteID);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
     }
 }

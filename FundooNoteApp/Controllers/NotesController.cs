@@ -66,7 +66,7 @@ namespace FundooNoteApp.Controllers
                 {
                     return this.Ok(new { success = true, message = "Note Updated Successfully", result = updateNote });
                 }
-                return this.Ok(new { success = true, message = "Note Not Updated" });
+                return this.Ok(new { success = true, message = "Enter Valid NoteID" });
             }
             catch (Exception ex)
             {
@@ -85,7 +85,7 @@ namespace FundooNoteApp.Controllers
                 {
                     return this.Ok(new { success = true, message = "Delete Note Successfully", result = deleteNote });
                 }
-                return this.Ok(new { success = true, message = "Note Not Deleted" });
+                return this.Ok(new { success = true, message = "Enter Valid NoteID" });
             }
             catch (Exception ex)
             {
@@ -104,7 +104,7 @@ namespace FundooNoteApp.Controllers
                 {
                     return this.Ok(new { success = true, message = "PinNote Operation is Successfull", result = pin });
                 }
-                return this.Ok(new { success = true, message = "Pin Operation is Unsuccessfull" });
+                return this.Ok(new { success = true, message = "Enter Valid NoteID" });
             }
             catch (Exception ex)
             {
@@ -123,7 +123,7 @@ namespace FundooNoteApp.Controllers
                 {
                     return this.Ok(new { success = true, message = "Archive Operation is Successfull", result = archive });
                 }
-                return this.Ok(new { success = true, message = "Archive Operation is Unsuccessfull" });
+                return this.Ok(new { success = true, message = "Enter Valid NoteID" });
             }
             catch (Exception ex)
             {
@@ -142,7 +142,45 @@ namespace FundooNoteApp.Controllers
                 {
                     return this.Ok(new { success = true, message = "Trash Operation is Successfull", result = trash });
                 }
-                return this.Ok(new { success = true, message = "Trash Operation is Unsuccessfull" });
+                return this.Ok(new { success = true, message = "Enter Valid NoteID" });
+            }
+            catch (Exception ex)
+            {
+                return this.BadRequest(new { success = false, message = ex.Message });
+            }
+        }
+        [HttpPut]
+        [Route("updatecolor")]
+        public IActionResult Color(string color, int noteID)
+        {
+            try
+            {
+                int UserID = Convert.ToInt32(User.FindFirst("UserID").Value);
+                bool updateColor = this.notesManager.Color(color, UserID, noteID);
+                if (updateColor)
+                {
+                    return this.Ok(new { success = true, message = "Color Updated Successfully", result = updateColor });
+                }
+                return this.Ok(new { success = true, message = "Enter valid NoteID " });
+            }
+            catch (Exception ex)
+            {
+                return this.BadRequest(new { success = false, message = ex.Message });
+            }
+        }
+        [HttpPut]
+        [Route("setremainder")]
+        public IActionResult Remainder(DateTime remainder, int noteID)
+        {
+            try
+            {
+                int UserID = Convert.ToInt32(User.FindFirst("UserID").Value);
+                bool updateRemainder = this.notesManager.Remainder(remainder, UserID, noteID);
+                if (updateRemainder)
+                {
+                    return this.Ok(new { success = true, message = "Remainder Updated Successfully", result = updateRemainder });
+                }
+                return this.Ok(new { success = true, message = "Enter valid NoteID " });
             }
             catch (Exception ex)
             {
