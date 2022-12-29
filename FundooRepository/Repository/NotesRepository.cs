@@ -308,6 +308,7 @@ namespace FundooRepository.Repository
                 {
                     SqlCommand command = new SqlCommand("SPColor", connection);
 
+
                     command.CommandType = CommandType.StoredProcedure;
                     command.Parameters.AddWithValue("@UserID", userID);
                     command.Parameters.AddWithValue("@NoteID", noteID);
