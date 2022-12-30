@@ -13,5 +13,6 @@ namespace FundooManager.Interface
         public bool TrashNote(bool trashNote, int userID, int noteID);
         public bool Color(string color, int userID, int noteID);
         public bool Remainder(DateTime remainder, int userID, int noteID);
+        //public bool UploadImage(string filePath, int noteID, int userID);
     }
 }

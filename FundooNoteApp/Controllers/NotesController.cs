@@ -187,5 +187,24 @@ namespace FundooNoteApp.Controllers
                 return this.BadRequest(new { success = false, message = ex.Message });
             }
         }
+        //[HttpPut]
+        //[Route("uploadimage")]
+        //public IActionResult UploadImage(string filepath, int noteID)
+        //{
+        //    try
+        //    {
+        //        int UserID = Convert.ToInt32(User.FindFirst("UserID").Value);
+        //        bool upload = this.notesManager.UploadImage(filepath, UserID, noteID);
+        //        if (upload)
+        //        {
+        //            return this.Ok(new { success = true, message = "Image Uploaded Successfully", result = upload });
+        //        }
+        //        return this.Ok(new { success = true, message = "Enter valid NoteID or File Path" });
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return this.BadRequest(new { success = false, message = ex.Message });
+        //    }
+        //}
     }
 }

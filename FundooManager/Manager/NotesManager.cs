@@ -111,5 +111,16 @@ namespace FundooManager.Manager
                 throw new Exception(ex.Message);
             }
         }
+        //public bool UploadImage(string filePath, int noteID, int userID)
+        //{
+        //    try
+        //    {
+        //        return this.notesRepository.UploadImage(filePath, userID, noteID);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        throw new Exception(ex.Message);
+        //    }
+        //}
     }
 }
