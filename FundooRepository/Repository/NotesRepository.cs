@@ -3,6 +3,8 @@ using Microsoft.Extensions.Configuration;
 using System.Data.SqlClient;
 using System.Data;
 using FundooRepository.Interface;
+using CloudinaryDotNet;
+using CloudinaryDotNet.Actions;
 
 namespace FundooRepository.Repository
 {
@@ -206,9 +208,9 @@ namespace FundooRepository.Repository
                     command.Parameters.AddWithValue("@PinNotes", pinNote);
 
                     connection.Open();
-                    int deleteOrNot = command.ExecuteNonQuery();
+                    int pinOrNot = command.ExecuteNonQuery();
 
-                    if (deleteOrNot >= 1)
+                    if (pinOrNot >= 1)
                     {
                         return true;
                     }
@@ -242,9 +244,9 @@ namespace FundooRepository.Repository
                     command.Parameters.AddWithValue("@Archive", archiveNote);
 
                     connection.Open();
-                    int deleteOrNot = command.ExecuteNonQuery();
+                    int archiveOrNot = command.ExecuteNonQuery();
 
-                    if (deleteOrNot >= 1)
+                    if (archiveOrNot >= 1)
                     {
                         return true;
                     }
@@ -278,9 +280,9 @@ namespace FundooRepository.Repository
                     command.Parameters.AddWithValue("@Trash", trashNote);
 
                     connection.Open();
-                    int deleteOrNot = command.ExecuteNonQuery();
+                    int trashOrNot = command.ExecuteNonQuery();
 
-                    if (deleteOrNot >= 1)
+                    if (trashOrNot >= 1)
                     {
                         return true;
                     }
@@ -314,9 +316,9 @@ namespace FundooRepository.Repository
                     command.Parameters.AddWithValue("@Color", color);
 
                     connection.Open();
-                    int deleteOrNot = command.ExecuteNonQuery();
+                    int updateColorOrNot = command.ExecuteNonQuery();
 
-                    if (deleteOrNot >= 1)
+                    if (updateColorOrNot >= 1)
                     {
                         return true;
                     }
@@ -350,9 +352,9 @@ namespace FundooRepository.Repository
                     command.Parameters.AddWithValue("@Reminder", remainder);
 
                     connection.Open();
-                    int deleteOrNot = command.ExecuteNonQuery();
+                    int setRemainderOrNot = command.ExecuteNonQuery();
 
-                    if (deleteOrNot >= 1)
+                    if (setRemainderOrNot >= 1)
                     {
                         return true;
                     }
@@ -371,6 +373,45 @@ namespace FundooRepository.Repository
                 }
             }
         }
+        //public bool UploadImage(string filePath, int noteID, int userID)
+        //{
+        //    SqlConnection connection = new SqlConnection(connectionString);
+
+        //    try
+        //    {
+        //        Account account= new Account("dygwgjiug", "169716436645923", "5uefq_ETzI-wFz53UbvbDp7S-yk");
+        //        Cloudinary cloudinary = new Cloudinary(account);
+        //        ImageUploadParams uploadParams = new ImageUploadParams()
+        //        {
+        //            File = new FileDescription(filePath),
+        //            PublicId = note
+        //        };
+        //        ImageUploadResult uploadResult = cloudinary.Upload(uploadParams);
+        //        using (connection)
+        //        {
+        //            SqlCommand command = new SqlCommand("SPUploadImage", connection);
+
+        //            command.CommandType = CommandType.StoredProcedure;
+        //            command.Parameters.AddWithValue("@UserID", userID);
+        //            command.Parameters.AddWithValue("@NoteID", noteID);
+        //            command.Parameters.AddWithValue("@Modified", DateTime.Now);
+        //            command.Parameters.AddWithValue("@Image", uploadResult.Url.ToString());
+
+        //            connection.Open();
+        //            int deleteOrNot = command.ExecuteNonQuery();
+
+        //            if (deleteOrNot >= 1)
+        //            {
+        //                return true;
+        //            }
+        //            return false;
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        throw new Exception(ex.Message);
+        //    }
+        //}
     }
 }
 
