@@ -24,6 +24,8 @@ namespace FundooNoteApp
             builder.Services.AddTransient<INotesManager, NotesManager>();
             builder.Services.AddTransient<ILabelManager, LabelManager>();
             builder.Services.AddTransient<ILabelRepository, LabelRepository>();
+            builder.Services.AddTransient<ICollaboratorManager, CollaboratorManager>();
+            builder.Services.AddTransient<ICollaboratorRepository, CollaboratorRepository>();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen(s =>
