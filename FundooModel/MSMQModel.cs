@@ -38,7 +38,7 @@ namespace FundooModel
             try
             {
                 var msg = messageQueue.EndReceive(e.AsyncResult);
-                string token = msg.Body.ToString();
+               string token = msg.Body.ToString();
                 MailMessage mailMessage= new MailMessage();
                 SmtpClient smtpClient = new SmtpClient("smtp.gmail.com")
                 {
