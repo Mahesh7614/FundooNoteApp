@@ -11,10 +11,11 @@ namespace FundooNoteApp.Controllers
     public class LabelController : ControllerBase
     {
         private readonly ILabelManager labelManager;
-
-        public LabelController(ILabelManager labelManager)
+        private readonly ILogger<LabelController> logger;
+        public LabelController(ILabelManager labelManager, ILogger<LabelController> logger)
         {
             this.labelManager = labelManager;
+            this.logger = logger;
         }
         [HttpPost]
         [Route("addlabel")]
@@ -26,8 +27,10 @@ namespace FundooNoteApp.Controllers
                 bool labelAdded = this.labelManager.AddLabel(label, noteID, UserID);
                 if (labelAdded)
                 {
+                    this.logger.LogInformation("Label is Added Successfully");
                     return this.Ok(new { success = true, message = $"Label is Added Successfully to NoteID : {noteID}", result = labelAdded });
                 }
+                this.logger.LogInformation("Label is Not Added");
                 return this.Ok(new { success = true, message = "Enter valid NoteID" });
             }
             catch (Exception ex)
@@ -80,8 +83,10 @@ namespace FundooNoteApp.Controllers
                 bool renameLabel = this.labelManager.DeleteLabel(labelID);
                 if (renameLabel)
                 {
+                    this.logger.LogInformation("Label Deleted Successfully");
                     return this.Ok(new { success = true, message = $"LabelID : {labelID} is Deleted Successfully", result = renameLabel });
                 }
+                this.logger.LogInformation("Label Not Deleted");
                 return this.Ok(new { success = true, message = "Enter valid LabelID" });
             }
             catch (Exception ex)

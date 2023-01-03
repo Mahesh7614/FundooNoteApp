@@ -11,10 +11,11 @@ namespace FundooNoteApp.Controllers
     public class UserController : ControllerBase
     {
         private readonly IUserManager userManager;
-
-        public UserController(IUserManager userManager)
+        private readonly ILogger<UserController> logger;
+        public UserController(IUserManager userManager, ILogger<UserController> logger)
         {
             this.userManager = userManager;
+            this.logger = logger;
         }
         [HttpPost]
         [Route("fundoo/register")]
@@ -25,8 +26,10 @@ namespace FundooNoteApp.Controllers
                 UserRegistrationModel registrationData = this.userManager.Registration(userRegistrationModel);
                 if (registrationData != null)
                 {
+                    this.logger.LogInformation("Registration Successful");
                     return this.Ok(new { success = true, message = "Registration Successful", result = registrationData });
                 }
+                this.logger.LogInformation("User Not Registered");
                 return this.Ok(new { success = true, message = "User Already Exists" });
             }
             catch (Exception ex)
@@ -43,8 +46,10 @@ namespace FundooNoteApp.Controllers
                 string loginToken = this.userManager.Login(userLogin);
                 if (loginToken != null)
                 {
-                    return this.Ok(new { success = true, message = "Login Successful", result = loginToken });
+                    this.logger.LogInformation("Login Successfull");
+                    return this.Ok(new { success = true, message = "Login Successfull", result = loginToken });
                 }
+                this.logger.LogInformation("Doesn't Login");
                 return this.Ok(new { success = true, message = "Enter Valid EmailID or Password" });
             }
             catch (Exception ex)

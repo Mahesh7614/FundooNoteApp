@@ -11,10 +11,13 @@ namespace FundooNoteApp.Controllers
     public class NotesController : ControllerBase
     {
         private readonly INotesManager notesManager;
+        private readonly ILogger<NotesController> logger;
 
-        public NotesController(INotesManager notesManager)
+        public NotesController(INotesManager notesManager, ILogger<NotesController> logger)
         {
             this.notesManager = notesManager;
+            this.logger = logger;
+            logger.LogDebug(1, "NLog injected into NoteController");
         }
         [HttpPost]
         [Route("createnotes")]
@@ -26,8 +29,10 @@ namespace FundooNoteApp.Controllers
                 NoteCreateModel NotesData = this.notesManager.CreateNotes(notecreateModel, UserID);
                 if (NotesData != null)
                 {
+                    this.logger.LogInformation("Note is Created");
                     return this.Ok(new { success = true, message = "Note Created Successfully", result = NotesData });
                 }
+                this.logger.LogInformation("Note is not Created");
                 return this.Ok(new { success = true, message = "Note not Created" });
             }
             catch (Exception ex)
@@ -45,8 +50,11 @@ namespace FundooNoteApp.Controllers
                 List<NoteModel> NotesData = this.notesManager.DisplayNotes(UserID);
                 if (NotesData != null)
                 {
+                    this.logger.LogInformation("All Notes are Displayed");
                     return this.Ok(new { success = true, message = "Display Notes Successfully", result = NotesData });
                 }
+                this.logger.LogInformation("Notes not get");
+
                 return this.Ok(new { success = true, message = "Notes are Empty" });
             }
             catch (Exception ex)

@@ -11,10 +11,11 @@ namespace FundooNoteApp.Controllers
     public class CollaboratorController : ControllerBase
     {
         private readonly ICollaboratorManager collaboratorManager;
-
-        public CollaboratorController(ICollaboratorManager collaboratorManager)
+        private readonly ILogger<CollaboratorController> logger;
+        public CollaboratorController(ICollaboratorManager collaboratorManager, ILogger<CollaboratorController> logger)
         {
             this.collaboratorManager = collaboratorManager;
+            this.logger = logger;
         }
         [HttpPost]
         [Route("addcollaborator")]
@@ -26,8 +27,10 @@ namespace FundooNoteApp.Controllers
                 bool collaboratorAdded = this.collaboratorManager.AddCollaborator(collaboratorEmail, UserID, noteID);
                 if (collaboratorAdded)
                 {
+                    this.logger.LogInformation("Collaborator is Added Successfully");
                     return this.Ok(new { success = true, message = $"Collaborator is Added Successfully to NoteID : {noteID}", result = collaboratorAdded });
                 }
+                this.logger.LogInformation("Collaborator is Not Added");
                 return this.Ok(new { success = true, message = "Enter valid NoteID" });
             }
             catch (Exception ex)
@@ -44,8 +47,10 @@ namespace FundooNoteApp.Controllers
                 bool collaboratorRemoved = this.collaboratorManager.RemoveCollaborator(collaboratorID);
                 if (collaboratorRemoved)
                 {
+                    this.logger.LogInformation("Collaborator is Removed Successfully");
                     return this.Ok(new { success = true, message = $"Collaborator Removed Successfully", result = collaboratorRemoved });
                 }
+                this.logger.LogInformation("Collaborator is Not Removed");
                 return this.Ok(new { success = true, message = "Enter valid CollaboratorID" });
             }
             catch (Exception ex)
