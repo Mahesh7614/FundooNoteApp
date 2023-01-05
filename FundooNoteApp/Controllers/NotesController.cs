@@ -1,5 +1,6 @@
 ﻿using FundooManager.Interface;
 using FundooModel;
+using FundooNoteApp.Helpers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -35,7 +36,7 @@ namespace FundooNoteApp.Controllers
                 this.logger.LogInformation("Note is not Created");
                 return this.Ok(new { success = true, message = "Note not Created" });
             }
-            catch (Exception ex)
+            catch (FundooAppException ex)
             {
                 return this.BadRequest(new { success = false, message = ex.Message });
             }
@@ -57,7 +58,7 @@ namespace FundooNoteApp.Controllers
 
                 return this.Ok(new { success = true, message = "Notes are Empty" });
             }
-            catch (Exception ex)
+            catch (FundooAppException ex)
             {
                 return this.BadRequest(new { success = false, message = ex.Message });
             }
@@ -76,7 +77,7 @@ namespace FundooNoteApp.Controllers
                 }
                 return this.Ok(new { success = true, message = "Enter Valid NoteID" });
             }
-            catch (Exception ex)
+            catch (FundooAppException ex)
             {
                 return this.BadRequest(new { success = false, message = ex.Message });
             }
@@ -95,7 +96,7 @@ namespace FundooNoteApp.Controllers
                 }
                 return this.Ok(new { success = true, message = "Enter Valid NoteID" });
             }
-            catch (Exception ex)
+            catch (FundooAppException ex)
             {
                 return this.BadRequest(new { success = false, message = ex.Message });
             }
@@ -114,7 +115,7 @@ namespace FundooNoteApp.Controllers
                 }
                 return this.Ok(new { success = true, message = "Enter Valid NoteID" });
             }
-            catch (Exception ex)
+            catch (FundooAppException ex)
             {
                 return this.BadRequest(new { success = false, message = ex.Message });
             }
@@ -133,7 +134,7 @@ namespace FundooNoteApp.Controllers
                 }
                 return this.Ok(new { success = true, message = "Enter Valid NoteID" });
             }
-            catch (Exception ex)
+            catch (FundooAppException ex)
             {
                 return this.BadRequest(new { success = false, message = ex.Message });
             }
@@ -152,7 +153,7 @@ namespace FundooNoteApp.Controllers
                 }
                 return this.Ok(new { success = true, message = "Enter Valid NoteID" });
             }
-            catch (Exception ex)
+            catch (FundooAppException ex)
             {
                 return this.BadRequest(new { success = false, message = ex.Message });
             }
@@ -171,7 +172,7 @@ namespace FundooNoteApp.Controllers
                 }
                 return this.Ok(new { success = true, message = "Enter valid NoteID " });
             }
-            catch (Exception ex)
+            catch (FundooAppException ex)
             {
                 return this.BadRequest(new { success = false, message = ex.Message });
             }
@@ -190,7 +191,7 @@ namespace FundooNoteApp.Controllers
                 }
                 return this.Ok(new { success = true, message = "Enter valid NoteID " });
             }
-            catch (Exception ex)
+            catch (FundooAppException ex)
             {
                 return this.BadRequest(new { success = false, message = ex.Message });
             }

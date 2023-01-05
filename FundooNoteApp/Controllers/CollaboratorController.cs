@@ -1,5 +1,6 @@
 ﻿using FundooManager.Interface;
 using FundooModel;
+using FundooNoteApp.Helpers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -33,7 +34,7 @@ namespace FundooNoteApp.Controllers
                 this.logger.LogInformation("Collaborator is Not Added");
                 return this.Ok(new { success = true, message = "Enter valid NoteID" });
             }
-            catch (Exception ex)
+            catch (FundooAppException ex)
             {
                 return this.BadRequest(new { success = false, message = ex.Message });
             }
@@ -53,7 +54,7 @@ namespace FundooNoteApp.Controllers
                 this.logger.LogInformation("Collaborator is Not Removed");
                 return this.Ok(new { success = true, message = "Enter valid CollaboratorID" });
             }
-            catch (Exception ex)
+            catch (FundooAppException ex)
             {
                 return this.BadRequest(new { success = false, message = ex.Message });
             }
@@ -71,7 +72,7 @@ namespace FundooNoteApp.Controllers
                 }
                 return this.Ok(new { success = true, message = "Enter valid NoteID" });
             }
-            catch (Exception ex)
+            catch (FundooAppException ex)
             {
                 return this.BadRequest(new { success = false, message = ex.Message });
             }

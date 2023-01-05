@@ -1,5 +1,6 @@
 ﻿using FundooManager.Interface;
 using FundooModel;
+using FundooNoteApp.Helpers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using StackExchange.Redis;
@@ -33,7 +34,7 @@ namespace FundooNoteApp.Controllers
                 this.logger.LogInformation("User Not Registered");
                 return this.Ok(new { success = true, message = "User Already Exists" });
             }
-            catch (Exception ex)
+            catch (FundooAppException ex)
             {
                 return this.BadRequest(new { success = false, message = ex.Message });
             }
@@ -67,7 +68,7 @@ namespace FundooNoteApp.Controllers
                 this.logger.LogInformation("Doesn't Login");
                 return this.Ok(new { success = true, message = "Enter Valid EmailID or Password" });
             }
-            catch (Exception ex)
+            catch (FundooAppException ex)
             {
                 return this.BadRequest(new { success = false, message = ex.Message });
             }
@@ -85,7 +86,7 @@ namespace FundooNoteApp.Controllers
                 }
                 return this.Ok(new { success = true, message = "Enter Valid EmailID " });
             }
-            catch (Exception ex)
+            catch (FundooAppException ex)
             {
                 return this.BadRequest(new { success = false, message = ex.Message });
             }
@@ -108,7 +109,7 @@ namespace FundooNoteApp.Controllers
                 }
                 return this.Ok(new { success = true, message = "Enter Password same as above" });
             }
-            catch (Exception ex)
+            catch (FundooAppException ex)
             {
                 return this.BadRequest(new { success = false, message = ex.Message });
             }
