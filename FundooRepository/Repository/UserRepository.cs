@@ -7,6 +7,7 @@ using System.Security.Claims;
 using System.Data.SqlClient;
 using System.Text;
 using System.IdentityModel.Tokens.Jwt;
+using StackExchange.Redis;
 
 namespace FundooRepository.Repository
 {
@@ -94,6 +95,9 @@ namespace FundooRepository.Repository
                 UserRegistrationModel userRegistration = new UserRegistrationModel();
                 using (connection)
                 {
+                    ConnectionMultiplexer connectionMultiplexer = ConnectionMultiplexer.Connect("127.0.0.1:6379");
+                    IDatabase database = connectionMultiplexer.GetDatabase();
+
                     SqlCommand command = new SqlCommand("SPLogin", connection);
 
                     command.CommandType = CommandType.StoredProcedure;
@@ -108,7 +112,12 @@ namespace FundooRepository.Repository
                         while (Reader.Read())
                         {
                             userRegistration.UserID = Reader.IsDBNull("UserID") ? 0 : Reader.GetInt32("UserID");
+                            userRegistration.FirstName = Reader.IsDBNull("FirstName") ? string.Empty : Reader.GetString("FirstName");
+                            userRegistration.LastName = Reader.IsDBNull("LastName") ? string.Empty : Reader.GetString("LastName");
                         }
+                        database.StringSet(key: "UserID", userRegistration.UserID.ToString());
+                        database.StringSet(key: "FirstName", userRegistration.FirstName);
+                        database.StringSet(key: "LastName", userRegistration.LastName);
                         var token = GenerateJWTToken(userLogin.EmailID, userRegistration.UserID);
                         return token;
                     }

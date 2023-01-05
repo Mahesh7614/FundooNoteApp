@@ -2,6 +2,7 @@
 using FundooModel;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using StackExchange.Redis;
 using System.Security.Claims;
 
 namespace FundooNoteApp.Controllers
@@ -46,6 +47,20 @@ namespace FundooNoteApp.Controllers
                 string loginToken = this.userManager.Login(userLogin);
                 if (loginToken != null)
                 {
+                    ConnectionMultiplexer multiplexer = ConnectionMultiplexer.Connect("127.0.0.1:6379");
+                    IDatabase database = multiplexer.GetDatabase();
+                    string FirstName = database.StringGet("FirstName");
+                    string LastName = database.StringGet("LastName");
+                    int UserID = Convert.ToInt32(database.StringGet("UserID"));
+                   
+
+                    UserRegistrationModel registrationModel = new UserRegistrationModel()
+                    {
+                        UserID = UserID,
+                        FirstName = FirstName,
+                        LastName = LastName,
+                        EmailID = userLogin.EmailID
+                    };
                     this.logger.LogInformation("Login Successfull");
                     return this.Ok(new { success = true, message = "Login Successfull", result = loginToken });
                 }
