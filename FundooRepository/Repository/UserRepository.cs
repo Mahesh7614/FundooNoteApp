@@ -87,7 +87,7 @@ namespace FundooRepository.Repository
                 }
             }
         }
-        public string Login(UserLoginModel userLogin)
+        public UserRegistrationModel Login(UserLoginModel userLogin)
         {
             SqlConnection connection = new SqlConnection(connectionString);
             try
@@ -114,12 +114,13 @@ namespace FundooRepository.Repository
                             userRegistration.UserID = Reader.IsDBNull("UserID") ? 0 : Reader.GetInt32("UserID");
                             userRegistration.FirstName = Reader.IsDBNull("FirstName") ? string.Empty : Reader.GetString("FirstName");
                             userRegistration.LastName = Reader.IsDBNull("LastName") ? string.Empty : Reader.GetString("LastName");
+                            userRegistration.EmailID = Reader.IsDBNull("EmailID") ? string.Empty : Reader.GetString("EmailID");
                         }
                         database.StringSet(key: "UserID", userRegistration.UserID.ToString());
                         database.StringSet(key: "FirstName", userRegistration.FirstName);
                         database.StringSet(key: "LastName", userRegistration.LastName);
-                        var token = GenerateJWTToken(userLogin.EmailID, userRegistration.UserID);
-                        return token;
+                        //var token = GenerateJWTToken(userLogin.EmailID, userRegistration.UserID);
+                        return userRegistration;
                     }
                     return null;
                 }
@@ -204,6 +205,42 @@ namespace FundooRepository.Repository
             catch (Exception ex)
             {
                 throw new Exception(ex.Message);
+            }
+        }
+        public UserRegistrationModel GetUser(int UserID)
+        {
+            SqlConnection connection = new SqlConnection(connectionString);
+            try
+            {
+                UserRegistrationModel model = new UserRegistrationModel();
+                SqlCommand command = new SqlCommand("GetUser", connection);
+                command.CommandType = CommandType.StoredProcedure;
+                command.Parameters.AddWithValue("@UserID", UserID);
+                connection.Open();
+                SqlDataReader reader = command.ExecuteReader();
+                if(reader.HasRows)
+                {
+                    while(reader.Read())
+                    {
+                        model.UserID = reader.IsDBNull("UserID") ? 0 : reader.GetInt32("UserID");
+                        model.FirstName = reader.IsDBNull("FirstName") ? string.Empty : reader.GetString("FirstName");
+                        model.LastName = reader.IsDBNull("LastName") ? string.Empty : reader.GetString("LastName");
+                        model.EmailID = reader.IsDBNull("EmailID") ? string.Empty : reader.GetString("EmailID");
+                    }
+                    return model;
+                }
+                return null;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+            finally
+            {
+                if(connection.State == ConnectionState.Open)
+                {
+                    connection.Close();
+                }
             }
         }
     }

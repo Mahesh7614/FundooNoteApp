@@ -23,6 +23,11 @@ namespace FundooNoteApp
                 // Add services to the container.
 
                 builder.Services.AddControllers();
+                builder.Services.AddSession(options =>
+                {
+                    options.IdleTimeout = TimeSpan.FromHours(1);
+                });
+                builder.Services.AddDistributedMemoryCache();
                 builder.Services.AddTransient<IUserRepository, UserRepository>();
                 builder.Services.AddTransient<IUserManager, UserManager>();
                 builder.Services.AddTransient<INotesRepository, NotesRepository>();
@@ -94,6 +99,7 @@ namespace FundooNoteApp
                 app.UseAuthentication();
 
                 app.UseHttpsRedirection();
+                app.UseSession();
                 app.UseStaticFiles();
 
                 app.UseRouting();

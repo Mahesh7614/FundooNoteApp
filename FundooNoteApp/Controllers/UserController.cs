@@ -45,15 +45,21 @@ namespace FundooNoteApp.Controllers
         {
             try
             {
-                string loginToken = this.userManager.Login(userLogin);
-                if (loginToken != null)
+                UserRegistrationModel UserData = this.userManager.Login(userLogin);
+                if (UserData != null)
                 {
+
+                    string loginToken = this.userManager.GenerateJWTToken(UserData.EmailID, UserData.UserID);
+                    SetSession(UserData);
+                    string name = HttpContext.Session.GetString("UserName");
+                    string Email = HttpContext.Session.GetString("UserEmail");
+                    var userId = HttpContext.Session.GetInt32("UserId");
                     ConnectionMultiplexer multiplexer = ConnectionMultiplexer.Connect("127.0.0.1:6379");
                     IDatabase database = multiplexer.GetDatabase();
                     string FirstName = database.StringGet("FirstName");
                     string LastName = database.StringGet("LastName");
                     int UserID = Convert.ToInt32(database.StringGet("UserID"));
-                   
+
 
                     UserRegistrationModel registrationModel = new UserRegistrationModel()
                     {
@@ -113,6 +119,31 @@ namespace FundooNoteApp.Controllers
             {
                 return this.BadRequest(new { success = false, message = ex.Message });
             }
+        }
+        [Authorize]
+        [HttpGet]
+        public IActionResult GetUser()
+        {
+            try
+            {
+                int UserID = Convert.ToInt32(User.FindFirst("UserID").Value);
+                UserRegistrationModel registrationModel = this.userManager.GetUser(UserID);
+                if(registrationModel != null)
+                {
+                    return this.Ok(new { Success = true , message = "Get User Sucessfully", result = registrationModel}); 
+                }
+                return this.Ok(new { Success = true, message = "User Not get", result = registrationModel });
+            }
+            catch(FundooAppException ex)
+            {
+                return this.BadRequest(new {Success = false, message = ex.Message});
+            }
+        }
+        private void SetSession(UserRegistrationModel user)
+        {
+            HttpContext.Session.SetString("UserName",user.FirstName + " " + user.LastName);
+            HttpContext.Session.SetString("UserEmail",user.EmailID);
+            HttpContext.Session.SetInt32("UserId",user.UserID);
         }
     }
 }

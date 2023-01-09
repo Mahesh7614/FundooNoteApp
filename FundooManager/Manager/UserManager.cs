@@ -23,7 +23,7 @@ namespace FundooManager.Manager
                 throw new Exception(ex.Message);
             }
         }
-        public string Login(UserLoginModel userLogin)
+        public UserRegistrationModel Login(UserLoginModel userLogin)
         {
             try
             {
@@ -50,6 +50,28 @@ namespace FundooManager.Manager
             try
             {
                 return this.userRepository.ResetPassword(userResetPassword, emailID);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+        public UserRegistrationModel GetUser(int UserID)
+        {
+            try
+            {
+                return this.userRepository.GetUser(UserID);
+            }
+            catch(Exception ex)
+            { 
+                throw new Exception(ex.Message);
+            }
+        }
+        public string GenerateJWTToken(string emailID, int UserID)
+        {
+            try
+            {
+                return this.userRepository.GenerateJWTToken(emailID, UserID);
             }
             catch (Exception ex)
             {
