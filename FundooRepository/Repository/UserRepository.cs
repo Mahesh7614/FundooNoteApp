@@ -1,21 +1,25 @@
-﻿using FundooModel;
-using FundooRepository.Interface;
-using Microsoft.Extensions.Configuration;
-using Microsoft.IdentityModel.Tokens;
-using System.Data;
-using System.Security.Claims;
-using System.Data.SqlClient;
-using System.Text;
-using System.IdentityModel.Tokens.Jwt;
-using StackExchange.Redis;
-
-namespace FundooRepository.Repository
+﻿namespace FundooRepository.Repository
 {
+    using System.Security.Claims;
+    using System.Data;
+    using FundooModel;
+    using FundooRepository.Interface;
+    using Microsoft.Extensions.Configuration;
+    using Microsoft.IdentityModel.Tokens;
+    using System.Data.SqlClient;
+    using System.Text;
+    using System.IdentityModel.Tokens.Jwt;
+    using StackExchange.Redis;
     public class UserRepository : IUserRepository
     {
         private readonly IConfiguration config;
-        string connectionString;
+        private string connectionString;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="UserRepository"/> class.
+        /// </summary>
+        /// <param name="configuration">The configuration.</param>
+        /// <param name="config">The configuration.</param>
         public UserRepository(IConfiguration configuration, IConfiguration config)
         {
             connectionString = configuration.GetConnectionString("UserDBConnection");

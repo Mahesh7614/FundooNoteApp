@@ -60,7 +60,6 @@ namespace FundooNoteApp.Controllers
                     string LastName = database.StringGet("LastName");
                     int UserID = Convert.ToInt32(database.StringGet("UserID"));
 
-
                     UserRegistrationModel registrationModel = new UserRegistrationModel()
                     {
                         UserID = UserID,
@@ -79,6 +78,7 @@ namespace FundooNoteApp.Controllers
                 return this.BadRequest(new { success = false, message = ex.Message });
             }
         }
+
         [HttpGet]
         [Route("fundoo/forgotpassword")]
         public IActionResult ForgotPassword(string emailID)
