@@ -1,22 +1,42 @@
-﻿using FundooModel;
-using FundooRepository.Interface;
-using Microsoft.Extensions.Configuration;
-using System.Data;
-using System.Data.SqlClient;
+﻿// <copyright file="LabelRepository.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
 
 namespace FundooRepository.Repository
 {
+    using System.Data;
+    using System.Data.SqlClient;
+    using FundooModel;
+    using FundooRepository.Interface;
+    using Microsoft.Extensions.Configuration;
+
+    /// <summary>
+    /// LabelRepository.
+    /// </summary>
     public class LabelRepository : ILabelRepository
     {
-        string connectionString;
+        private string? connectionString;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="LabelRepository"/> class.
+        /// </summary>
+        /// <param name="configuration">configuration.</param>
         public LabelRepository(IConfiguration configuration)
         {
-            connectionString = configuration.GetConnectionString("UserDBConnection");
+            this.connectionString = configuration.GetConnectionString("UserDBConnection");
         }
+
+        /// <summary>
+        /// AddLabel.
+        /// </summary>
+        /// <param name="label">label.</param>
+        /// <param name="noteID">noteID.</param>
+        /// <param name="userID">userID.</param>
+        /// <returns>bool.</returns>
+        /// <exception cref="Exception">Exception.</exception>
         public bool AddLabel(string label, int noteID, int userID)
         {
-            SqlConnection connection = new SqlConnection(connectionString);
+            SqlConnection connection = new SqlConnection(this.connectionString);
 
             try
             {
@@ -36,6 +56,7 @@ namespace FundooRepository.Repository
                     {
                         return true;
                     }
+
                     return false;
                 }
             }
@@ -44,9 +65,16 @@ namespace FundooRepository.Repository
                 throw new Exception(ex.Message);
             }
         }
+
+        /// <summary>
+        /// GetLables.
+        /// </summary>
+        /// <param name="noteID">noteID.</param>
+        /// <returns>List of LabelModel.</returns>
+        /// <exception cref="Exception">Exception.</exception>
         public List<LabelModel> GetLables(int noteID)
         {
-            SqlConnection connection = new SqlConnection(connectionString);
+            SqlConnection connection = new SqlConnection(this.connectionString);
 
             try
             {
@@ -70,13 +98,17 @@ namespace FundooRepository.Repository
                                 LabelID = Reader.IsDBNull("LabelID") ? 0 : Reader.GetInt32("LabelID"),
                                 LabelName = Reader.IsDBNull("LabelName") ? string.Empty : Reader.GetString("LabelName"),
                                 NoteID = Reader.IsDBNull("NoteID") ? 0 : Reader.GetInt32("NoteID"),
-                                UserID = Reader.IsDBNull("UserID") ? 0 : Reader.GetInt32("UserID")
+                                UserID = Reader.IsDBNull("UserID") ? 0 : Reader.GetInt32("UserID"),
                             };
                             listLabel.Add(label);
                         }
+
                         return listLabel;
                     }
+
+#pragma warning disable CS8603 // Possible null reference return.
                     return null;
+#pragma warning restore CS8603 // Possible null reference return.
                 }
             }
             catch (Exception ex)
@@ -84,9 +116,17 @@ namespace FundooRepository.Repository
                 throw new Exception(ex.Message);
             }
         }
+
+        /// <summary>
+        /// UpdateLabel.
+        /// </summary>
+        /// <param name="newlabel">newlabel.</param>
+        /// <param name="labelID">labelID.</param>
+        /// <returns>bool.</returns>
+        /// <exception cref="Exception">Exception.</exception>
         public bool UpdateLabel(string newlabel, int labelID)
         {
-            SqlConnection connection = new SqlConnection(connectionString);
+            SqlConnection connection = new SqlConnection(this.connectionString);
 
             try
             {
@@ -105,6 +145,7 @@ namespace FundooRepository.Repository
                     {
                         return true;
                     }
+
                     return false;
                 }
             }
@@ -113,9 +154,16 @@ namespace FundooRepository.Repository
                 throw new Exception(ex.Message);
             }
         }
+
+        /// <summary>
+        /// DeleteLabel.
+        /// </summary>
+        /// <param name="labelID">labelID.</param>
+        /// <returns>bool.</returns>
+        /// <exception cref="Exception">Exception.</exception>
         public bool DeleteLabel(int labelID)
         {
-            SqlConnection connection = new SqlConnection(connectionString);
+            SqlConnection connection = new SqlConnection(this.connectionString);
 
             try
             {
@@ -133,6 +181,7 @@ namespace FundooRepository.Repository
                     {
                         return true;
                     }
+
                     return false;
                 }
             }

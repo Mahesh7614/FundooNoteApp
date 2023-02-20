@@ -1,29 +1,49 @@
-﻿using Microsoft.Extensions.Configuration;
-using System.Data.SqlClient;
-using System.Data;
-using FundooModel;
-using FundooRepository.Interface;
+﻿// <copyright file="CollaboratorRepository.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
 
 namespace FundooRepository.Repository
 {
+    using System.Data;
+    using System.Data.SqlClient;
+    using FundooModel;
+    using FundooRepository.Interface;
+    using Microsoft.Extensions.Configuration;
+
+    /// <summary>
+    /// CollaboratorRepository.
+    /// </summary>
     public class CollaboratorRepository : ICollaboratorRepository
     {
-        string connectionString;
+        private string? connectionString;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CollaboratorRepository"/> class.
+        /// </summary>
+        /// <param name="configuration">configuration.</param>
         public CollaboratorRepository(IConfiguration configuration)
         {
-            connectionString = configuration.GetConnectionString("UserDBConnection");
+            this.connectionString = configuration.GetConnectionString("UserDBConnection");
         }
-        public bool AddCollaborator(string collaboratorEmail, int UserID, int NoteID)
+
+        /// <summary>
+        /// AddCollaborator.
+        /// </summary>
+        /// <param name="collaboratorEmail">collaboratorEmail.</param>
+        /// <param name="userID">userID.</param>
+        /// <param name="noteID">noteID.</param>
+        /// <returns>bool.</returns>
+        /// <exception cref="Exception">Exception.</exception>
+        public bool AddCollaborator(string collaboratorEmail, int userID, int noteID)
         {
-            SqlConnection connection = new SqlConnection(connectionString);
+            SqlConnection connection = new SqlConnection(this.connectionString);
             try
             {
                 SqlCommand command = new SqlCommand("SPAddcollaborator", connection);
                 command.CommandType = CommandType.StoredProcedure;
                 command.Parameters.AddWithValue("@CollabratorEmail", collaboratorEmail);
-                command.Parameters.AddWithValue("@NoteID", NoteID);
-                command.Parameters.AddWithValue("@UserID", UserID);
+                command.Parameters.AddWithValue("@NoteID", noteID);
+                command.Parameters.AddWithValue("@UserID", userID);
                 command.Parameters.AddWithValue("@Modified", DateTime.Now);
 
                 connection.Open();
@@ -33,6 +53,7 @@ namespace FundooRepository.Repository
                 {
                     return true;
                 }
+
                 return false;
             }
             catch (Exception ex)
@@ -47,9 +68,16 @@ namespace FundooRepository.Repository
                 }
             }
         }
+
+        /// <summary>
+        /// RemoveCollaborator.
+        /// </summary>
+        /// <param name="collaboratorID">collaboratorID.</param>
+        /// <returns>bool.</returns>
+        /// <exception cref="Exception">Exception.</exception>
         public bool RemoveCollaborator(int collaboratorID)
         {
-            SqlConnection connection = new SqlConnection(connectionString);
+            SqlConnection connection = new SqlConnection(this.connectionString);
             try
             {
                 SqlCommand command = new SqlCommand("SPRemoveCollaborator", connection);
@@ -63,6 +91,7 @@ namespace FundooRepository.Repository
                 {
                     return true;
                 }
+
                 return false;
             }
             catch (Exception ex)
@@ -77,9 +106,16 @@ namespace FundooRepository.Repository
                 }
             }
         }
+
+        /// <summary>
+        /// GetCollaborators.
+        /// </summary>
+        /// <param name="noteID">noteID.</param>
+        /// <returns>List of CollaboratorModel.</returns>
+        /// <exception cref="Exception">Exception.</exception>
         public List<CollaboratorModel> GetCollaborators(int noteID)
         {
-            SqlConnection connection = new SqlConnection(connectionString);
+            SqlConnection connection = new SqlConnection(this.connectionString);
             try
             {
                 List<CollaboratorModel> collaborators = new List<CollaboratorModel>();
@@ -100,13 +136,17 @@ namespace FundooRepository.Repository
                             CollaboratorEmail = dataReader.IsDBNull("CollabratorEmail") ? string.Empty : dataReader.GetString("CollabratorEmail"),
                             ModifiedTime = dataReader.IsDBNull("Modified") ? DateTime.MinValue : dataReader.GetDateTime("Modified"),
                             NoteID = dataReader.IsDBNull("NoteID") ? 0 : dataReader.GetInt32("NoteID"),
-                            UserID = dataReader.IsDBNull("UserID") ? 0 : dataReader.GetInt32("UserID")
+                            UserID = dataReader.IsDBNull("UserID") ? 0 : dataReader.GetInt32("UserID"),
                         };
                         collaborators.Add(collaboratorModel);
                     }
+
                     return collaborators;
                 }
+
+#pragma warning disable CS8603 // Possible null reference return.
                 return null;
+#pragma warning restore CS8603 // Possible null reference return.
             }
             catch (Exception ex)
             {
@@ -122,4 +162,3 @@ namespace FundooRepository.Repository
         }
     }
 }
-

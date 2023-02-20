@@ -1,62 +1,92 @@
-﻿namespace FundooRepository.Repository
+﻿// <copyright file="UserRepository.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
+
+namespace FundooRepository.Repository
 {
-    using System.Security.Claims;
     using System.Data;
+    using System.Data.SqlClient;
+    using System.IdentityModel.Tokens.Jwt;
+    using System.Security.Claims;
+    using System.Text;
     using FundooModel;
     using FundooRepository.Interface;
     using Microsoft.Extensions.Configuration;
     using Microsoft.IdentityModel.Tokens;
-    using System.Data.SqlClient;
-    using System.Text;
-    using System.IdentityModel.Tokens.Jwt;
     using StackExchange.Redis;
+
+    /// <summary>
+    /// UserRepository.
+    /// </summary>
     public class UserRepository : IUserRepository
     {
         private readonly IConfiguration config;
-        private string connectionString;
+        private readonly string? connectionString;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="UserRepository"/> class.
         /// </summary>
-        /// <param name="configuration">The configuration.</param>
-        /// <param name="config">The configuration.</param>
+        /// <param name="configuration">configuration.</param>
+        /// <param name="config">config.</param>
         public UserRepository(IConfiguration configuration, IConfiguration config)
         {
-            connectionString = configuration.GetConnectionString("UserDBConnection");
+            this.connectionString = configuration.GetConnectionString("UserDBConnection");
             this.config = config;
         }
+
+        /// <summary>
+        /// EncryptPassword.
+        /// </summary>
+        /// <param name="password">password.</param>
+        /// <returns>string.</returns>
         public static string EncryptPassword(string password)
         {
             byte[] encode = new byte[password.Length];
             encode = Encoding.UTF8.GetBytes(password);
             return Convert.ToBase64String(encode);
         }
+
+        /// <summary>
+        /// GenerateJWTToken.
+        /// </summary>
+        /// <param name="emailID">emailID.</param>
+        /// <param name="UserID">UserID.</param>
+        /// <returns>string.</returns>
         public string GenerateJWTToken(string emailID, int UserID)
         {
             try
             {
-                var loginSecurityKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(this.config[("Jwt:key")]));
+#pragma warning disable CS8604 // Possible null reference argument.
+                var loginSecurityKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(this.config["Jwt:key"]));
+#pragma warning restore CS8604 // Possible null reference argument.
                 var loginTokenDescripter = new SecurityTokenDescriptor
                 {
                     Subject = new ClaimsIdentity(new Claim[]
                     {
                         new Claim(ClaimTypes.Email, emailID),
-                        new Claim("UserID",UserID.ToString())
+                        new Claim("UserID", UserID.ToString()),
                     }),
                     Expires = DateTime.UtcNow.AddHours(5),
-                    SigningCredentials = new SigningCredentials(loginSecurityKey, SecurityAlgorithms.HmacSha256Signature)
+                    SigningCredentials = new SigningCredentials(loginSecurityKey, SecurityAlgorithms.HmacSha256Signature),
                 };
                 var token = new JwtSecurityTokenHandler().CreateToken(loginTokenDescripter);
                 return new JwtSecurityTokenHandler().WriteToken(token);
             }
             catch (Exception ex)
             {
-                throw ex.InnerException;
+                throw new Exception(ex.Message);
             }
         }
+
+        /// <summary>
+        /// Registration.
+        /// </summary>
+        /// <param name="userRegistration">userRegistration.</param>
+        /// <returns>UserRegistrationModel.</returns>
+        /// <exception cref="Exception">Exception.</exception>
         public UserRegistrationModel Registration(UserRegistrationModel userRegistration)
         {
-            SqlConnection connection = new SqlConnection(connectionString);
+            SqlConnection connection = new SqlConnection(this.connectionString);
             try
             {
                 using (connection)
@@ -67,7 +97,9 @@
                     command.Parameters.AddWithValue("@FirstName", userRegistration.FirstName);
                     command.Parameters.AddWithValue("@LastName", userRegistration.LastName);
                     command.Parameters.AddWithValue("@EmailID", userRegistration.EmailID);
+#pragma warning disable CS8604 // Possible null reference argument.
                     command.Parameters.AddWithValue("@Password", EncryptPassword(userRegistration.Password));
+#pragma warning restore CS8604 // Possible null reference argument.
 
                     connection.Open();
                     int registerOrNot = command.ExecuteNonQuery();
@@ -76,7 +108,10 @@
                     {
                         return userRegistration;
                     }
+
+#pragma warning disable CS8603 // Possible null reference return.
                     return null;
+#pragma warning restore CS8603 // Possible null reference return.
                 }
             }
             catch (Exception ex)
@@ -91,9 +126,16 @@
                 }
             }
         }
+
+        /// <summary>
+        /// Login.
+        /// </summary>
+        /// <param name="userLogin">userLogin.</param>
+        /// <returns>UserRegistrationModel.</returns>
+        /// <exception cref="Exception">Exception.</exception>
         public UserRegistrationModel Login(UserLoginModel userLogin)
         {
-            SqlConnection connection = new SqlConnection(connectionString);
+            SqlConnection connection = new SqlConnection(this.connectionString);
             try
             {
                 UserRegistrationModel userRegistration = new UserRegistrationModel();
@@ -106,27 +148,34 @@
 
                     command.CommandType = CommandType.StoredProcedure;
                     command.Parameters.AddWithValue("@EmailID", userLogin.EmailID);
+#pragma warning disable CS8604 // Possible null reference argument.
                     command.Parameters.AddWithValue("@Password", EncryptPassword(userLogin.Password));
+#pragma warning restore CS8604 // Possible null reference argument.
 
                     connection.Open();
-                    SqlDataReader Reader = command.ExecuteReader();
+                    SqlDataReader reader = command.ExecuteReader();
 
-                    if (Reader.HasRows)
+                    if (reader.HasRows)
                     {
-                        while (Reader.Read())
+                        while (reader.Read())
                         {
-                            userRegistration.UserID = Reader.IsDBNull("UserID") ? 0 : Reader.GetInt32("UserID");
-                            userRegistration.FirstName = Reader.IsDBNull("FirstName") ? string.Empty : Reader.GetString("FirstName");
-                            userRegistration.LastName = Reader.IsDBNull("LastName") ? string.Empty : Reader.GetString("LastName");
-                            userRegistration.EmailID = Reader.IsDBNull("EmailID") ? string.Empty : Reader.GetString("EmailID");
+                            userRegistration.UserID = reader.IsDBNull("UserID") ? 0 : reader.GetInt32("UserID");
+                            userRegistration.FirstName = reader.IsDBNull("FirstName") ? string.Empty : reader.GetString("FirstName");
+                            userRegistration.LastName = reader.IsDBNull("LastName") ? string.Empty : reader.GetString("LastName");
+                            userRegistration.EmailID = reader.IsDBNull("EmailID") ? string.Empty : reader.GetString("EmailID");
                         }
+
                         database.StringSet(key: "UserID", userRegistration.UserID.ToString());
                         database.StringSet(key: "FirstName", userRegistration.FirstName);
                         database.StringSet(key: "LastName", userRegistration.LastName);
-                        //var token = GenerateJWTToken(userLogin.EmailID, userRegistration.UserID);
+
+                        // var token = GenerateJWTToken(userLogin.EmailID, userRegistration.UserID);
                         return userRegistration;
                     }
+
+#pragma warning disable CS8603 // Possible null reference return.
                     return null;
+#pragma warning restore CS8603 // Possible null reference return.
                 }
             }
             catch (Exception ex)
@@ -141,9 +190,61 @@
                 }
             }
         }
+
+        /// <summary>
+        /// CreateTicketForPassword.
+        /// </summary>
+        /// <param name="emailID">emailID.</param>
+        /// <param name="token">token.</param>
+        /// <returns>UserTicket.</returns>
+        /// <exception cref="Exception">Exception.</exception>
+        public UserTicket CreateTicketForPassword(string emailID, string token)
+        {
+            SqlConnection connection = new SqlConnection(this.connectionString);
+            try
+            {
+                UserTicket ticket = new UserTicket();
+                using (connection)
+                {
+                    SqlCommand command = new SqlCommand("SPForgot", connection);
+                    command.CommandType = CommandType.StoredProcedure;
+                    command.Parameters.AddWithValue("@EmailID", emailID);
+
+                    connection.Open();
+                    SqlDataReader reader = command.ExecuteReader();
+
+                    if (reader.HasRows)
+                    {
+                        while (reader.Read())
+                        {
+                            ticket.FirstName = reader.IsDBNull("FirstName") ? string.Empty : reader.GetString("FirstName");
+                            ticket.EmailId = reader.IsDBNull("EmailID") ? string.Empty : reader.GetString("EmailID");
+                            ticket.Token = token;
+                            ticket.IssueAt = DateTime.Now;
+                        }
+
+                        return ticket;
+                    }
+#pragma warning disable CS8603 // Possible null reference return.
+                    return null;
+#pragma warning restore CS8603 // Possible null reference return.
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// ForgotPassword.
+        /// </summary>
+        /// <param name="emailID">emailID.</param>
+        /// <returns>string.</returns>
+        /// <exception cref="Exception">Exception.</exception>
         public string ForgotPassword(string emailID)
         {
-            SqlConnection connection = new SqlConnection(connectionString);
+            SqlConnection connection = new SqlConnection(this.connectionString);
             try
             {
                 UserRegistrationModel userRegistration = new UserRegistrationModel();
@@ -155,21 +256,27 @@
                     command.Parameters.AddWithValue("@EmailID", emailID);
 
                     connection.Open();
-                    SqlDataReader Reader = command.ExecuteReader();
+                    SqlDataReader reader = command.ExecuteReader();
 
-                    if (Reader.HasRows)
+                    if (reader.HasRows)
                     {
-                        while (Reader.Read())
+                        while (reader.Read())
                         {
-                            userRegistration.UserID = Reader.IsDBNull("UserID") ? 0 : Reader.GetInt32("UserID");
-                            userRegistration.FirstName = Reader.IsDBNull("FirstName") ? string.Empty : Reader.GetString("FirstName");
+                            userRegistration.UserID = reader.IsDBNull("UserID") ? 0 : reader.GetInt32("UserID");
+                            userRegistration.FirstName = reader.IsDBNull("FirstName") ? string.Empty : reader.GetString("FirstName");
                         }
-                        var token = GenerateJWTToken(emailID, userRegistration.UserID);
+
+                        var token = this.GenerateJWTToken(emailID, userRegistration.UserID);
                         MSMQModel mSMQModel = new MSMQModel();
+#pragma warning disable CS8604 // Possible null reference argument.
                         mSMQModel.SendMessage(token, emailID, userRegistration.FirstName);
-                        return token.ToString();
+#pragma warning restore CS8604 // Possible null reference argument.
+                        return token;
                     }
+
+#pragma warning disable CS8603 // Possible null reference return.
                     return null;
+#pragma warning restore CS8603 // Possible null reference return.
                 }
             }
             catch (Exception ex)
@@ -184,9 +291,17 @@
                 }
             }
         }
+
+        /// <summary>
+        /// ResetPassword.
+        /// </summary>
+        /// <param name="userResetPassword">userResetPassword.</param>
+        /// <param name="emailID">emailID.</param>
+        /// <returns>bool.</returns>
+        /// <exception cref="Exception">Exception.</exception>
         public bool ResetPassword(UserResetPasswordModel userResetPassword, string emailID)
         {
-            SqlConnection connection = new SqlConnection(connectionString);
+            SqlConnection connection = new SqlConnection(this.connectionString);
             try
             {
                 using (connection)
@@ -195,7 +310,9 @@
 
                     command.CommandType = CommandType.StoredProcedure;
                     command.Parameters.AddWithValue("@EmailID", emailID);
+#pragma warning disable CS8604 // Possible null reference argument.
                     command.Parameters.AddWithValue("@Password", EncryptPassword(userResetPassword.Password));
+#pragma warning restore CS8604 // Possible null reference argument.
                     connection.Open();
                     int resetOrNot = command.ExecuteNonQuery();
 
@@ -204,6 +321,7 @@
                         return true;
                     }
                 }
+
                 return false;
             }
             catch (Exception ex)
@@ -211,29 +329,40 @@
                 throw new Exception(ex.Message);
             }
         }
-        public UserRegistrationModel GetUser(int UserID)
+
+        /// <summary>
+        /// GetUser.
+        /// </summary>
+        /// <param name="userID">userID.</param>
+        /// <returns>UserRegistrationModel.</returns>
+        /// <exception cref="Exception">Exception.</exception>
+        public UserRegistrationModel GetUser(int userID)
         {
-            SqlConnection connection = new SqlConnection(connectionString);
+            SqlConnection connection = new SqlConnection(this.connectionString);
             try
             {
                 UserRegistrationModel model = new UserRegistrationModel();
                 SqlCommand command = new SqlCommand("GetUser", connection);
                 command.CommandType = CommandType.StoredProcedure;
-                command.Parameters.AddWithValue("@UserID", UserID);
+                command.Parameters.AddWithValue("@UserID", userID);
                 connection.Open();
                 SqlDataReader reader = command.ExecuteReader();
-                if(reader.HasRows)
+                if (reader.HasRows)
                 {
-                    while(reader.Read())
+                    while (reader.Read())
                     {
                         model.UserID = reader.IsDBNull("UserID") ? 0 : reader.GetInt32("UserID");
                         model.FirstName = reader.IsDBNull("FirstName") ? string.Empty : reader.GetString("FirstName");
                         model.LastName = reader.IsDBNull("LastName") ? string.Empty : reader.GetString("LastName");
                         model.EmailID = reader.IsDBNull("EmailID") ? string.Empty : reader.GetString("EmailID");
                     }
+
                     return model;
                 }
+
+#pragma warning disable CS8603 // Possible null reference return.
                 return null;
+#pragma warning restore CS8603 // Possible null reference return.
             }
             catch (Exception ex)
             {
@@ -241,7 +370,7 @@
             }
             finally
             {
-                if(connection.State == ConnectionState.Open)
+                if (connection.State == ConnectionState.Open)
                 {
                     connection.Close();
                 }

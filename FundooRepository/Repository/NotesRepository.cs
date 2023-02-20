@@ -1,24 +1,43 @@
-﻿using FundooModel;
-using Microsoft.Extensions.Configuration;
-using System.Data.SqlClient;
-using System.Data;
-using FundooRepository.Interface;
-using CloudinaryDotNet;
-using CloudinaryDotNet.Actions;
+﻿// <copyright file="NotesRepository.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
 
 namespace FundooRepository.Repository
 {
+    using System.Data;
+    using System.Data.SqlClient;
+    using CloudinaryDotNet;
+    using CloudinaryDotNet.Actions;
+    using FundooModel;
+    using FundooRepository.Interface;
+    using Microsoft.Extensions.Configuration;
+
+    /// <summary>
+    /// NotesRepository.
+    /// </summary>
     public class NotesRepository : INotesRepository
     {
-        string connectionString;
+        private string? connectionString;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="NotesRepository"/> class.
+        /// </summary>
+        /// <param name="configuration">configuration.</param>
         public NotesRepository(IConfiguration configuration)
         {
-            connectionString = configuration.GetConnectionString("UserDBConnection");
+            this.connectionString = configuration.GetConnectionString("UserDBConnection");
         }
+
+        /// <summary>
+        /// CreateNotes.
+        /// </summary>
+        /// <param name="notecreateModel">notecreateModel.</param>
+        /// <param name="userID">userID.</param>
+        /// <returns>NoteCreateModel.</returns>
+        /// <exception cref="Exception">Exception.</exception>
         public NoteCreateModel CreateNotes(NoteCreateModel notecreateModel, int userID)
         {
-            SqlConnection connection = new SqlConnection(connectionString);
+            SqlConnection connection = new SqlConnection(this.connectionString);
             try
             {
                 using (connection)
@@ -45,7 +64,10 @@ namespace FundooRepository.Repository
                     {
                         return notecreateModel;
                     }
+
+#pragma warning disable CS8603 // Possible null reference return.
                     return null;
+#pragma warning restore CS8603 // Possible null reference return.
                 }
             }
             catch (Exception ex)
@@ -60,9 +82,16 @@ namespace FundooRepository.Repository
                 }
             }
         }
+
+        /// <summary>
+        /// DisplayNotes.
+        /// </summary>
+        /// <param name="userID">userID.</param>
+        /// <returns>List of NoteModel.</returns>
+        /// <exception cref="Exception">Exception.</exception>
         public List<NoteModel> DisplayNotes(int userID)
         {
-            SqlConnection connection = new SqlConnection(connectionString);
+            SqlConnection connection = new SqlConnection(this.connectionString);
             try
             {
                 List<NoteModel> listNote = new List<NoteModel>();
@@ -74,32 +103,36 @@ namespace FundooRepository.Repository
                     command.Parameters.AddWithValue("@UserID", userID);
 
                     connection.Open();
-                    SqlDataReader Reader = command.ExecuteReader();
+                    SqlDataReader reader = command.ExecuteReader();
 
-                    if (Reader.HasRows)
+                    if (reader.HasRows)
                     {
-                        while (Reader.Read())
+                        while (reader.Read())
                         {
                             NoteModel noteModel = new NoteModel()
                             {
-                                NoteID = Reader.IsDBNull("NoteID") ? 0 : Reader.GetInt32("NoteID"),
-                                UserID = Reader.IsDBNull("UserID") ? 0 : Reader.GetInt32("UserID"),
-                                Title = Reader.IsDBNull("Title") ? string.Empty : Reader.GetString("Title"),
-                                Description = Reader.IsDBNull("Description") ? string.Empty : Reader.GetString("Description"),
-                                Reminder = Reader.IsDBNull("Reminder") ? DateTime.MinValue : Reader.GetDateTime("Reminder"),
-                                Color = Reader.IsDBNull("Color") ? string.Empty : Reader.GetString("Color"),
-                                Image = Reader.IsDBNull("Image") ? string.Empty : Reader.GetString("Image"),
-                                Archive = Reader.IsDBNull("Archive") ? false : Reader.GetBoolean("Archive"),
-                                PinNotes = Reader.IsDBNull("PinNotes") ? false : Reader.GetBoolean("PinNotes"),
-                                Trash = Reader.IsDBNull("Trash") ? false : Reader.GetBoolean("Archive"),
-                                Created = Reader.IsDBNull("Created") ? DateTime.MinValue : Reader.GetDateTime("Created"),
-                                Modified = Reader.IsDBNull("Modified") ? DateTime.MinValue : Reader.GetDateTime("Modified"),
+                                NoteID = reader.IsDBNull("NoteID") ? 0 : reader.GetInt32("NoteID"),
+                                UserID = reader.IsDBNull("UserID") ? 0 : reader.GetInt32("UserID"),
+                                Title = reader.IsDBNull("Title") ? string.Empty : reader.GetString("Title"),
+                                Description = reader.IsDBNull("Description") ? string.Empty : reader.GetString("Description"),
+                                Reminder = reader.IsDBNull("Reminder") ? DateTime.MinValue : reader.GetDateTime("Reminder"),
+                                Color = reader.IsDBNull("Color") ? string.Empty : reader.GetString("Color"),
+                                Image = reader.IsDBNull("Image") ? string.Empty : reader.GetString("Image"),
+                                Archive = reader.IsDBNull("Archive") ? false : reader.GetBoolean("Archive"),
+                                PinNotes = reader.IsDBNull("PinNotes") ? false : reader.GetBoolean("PinNotes"),
+                                Trash = reader.IsDBNull("Trash") ? false : reader.GetBoolean("Archive"),
+                                Created = reader.IsDBNull("Created") ? DateTime.MinValue : reader.GetDateTime("Created"),
+                                Modified = reader.IsDBNull("Modified") ? DateTime.MinValue : reader.GetDateTime("Modified"),
                             };
                             listNote.Add(noteModel);
                         }
+
                         return listNote;
                     }
+
+#pragma warning disable CS8603 // Possible null reference return.
                     return null;
+#pragma warning restore CS8603 // Possible null reference return.
                 }
             }
             catch (Exception ex)
@@ -114,9 +147,18 @@ namespace FundooRepository.Repository
                 }
             }
         }
+
+        /// <summary>
+        /// UpdateNotes.
+        /// </summary>
+        /// <param name="updateNote">updateNote.</param>
+        /// <param name="userID">userID.</param>
+        /// <param name="noteID">noteID.</param>
+        /// <returns>UpdateNoteModel.</returns>
+        /// <exception cref="Exception">Exception.</exception>
         public UpdateNoteModel UpdateNotes(UpdateNoteModel updateNote, int userID, int noteID)
         {
-            SqlConnection connection = new SqlConnection(connectionString);
+            SqlConnection connection = new SqlConnection(this.connectionString);
             try
             {
                 using (connection)
@@ -143,7 +185,10 @@ namespace FundooRepository.Repository
                     {
                         return updateNote;
                     }
+
+#pragma warning disable CS8603 // Possible null reference return.
                     return null;
+#pragma warning restore CS8603 // Possible null reference return.
                 }
             }
             catch (Exception ex)
@@ -158,9 +203,17 @@ namespace FundooRepository.Repository
                 }
             }
         }
+
+        /// <summary>
+        /// DeleteNote.
+        /// </summary>
+        /// <param name="userID">userID.</param>
+        /// <param name="noteID">noteID.</param>
+        /// <returns>bool.</returns>
+        /// <exception cref="Exception">Exception.</exception>
         public bool DeleteNote(int userID, int noteID)
         {
-            SqlConnection connection = new SqlConnection(connectionString);
+            SqlConnection connection = new SqlConnection(this.connectionString);
             try
             {
                 using (connection)
@@ -178,6 +231,7 @@ namespace FundooRepository.Repository
                     {
                         return true;
                     }
+
                     return false;
                 }
             }
@@ -193,9 +247,18 @@ namespace FundooRepository.Repository
                 }
             }
         }
+
+        /// <summary>
+        /// PinNote.
+        /// </summary>
+        /// <param name="pinNote">pinNote.</param>
+        /// <param name="userID">userID.</param>
+        /// <param name="noteID">noteID.</param>
+        /// <returns>bool.</returns>
+        /// <exception cref="Exception">Exception.</exception>
         public bool PinNote(bool pinNote, int userID, int noteID)
         {
-            SqlConnection connection = new SqlConnection(connectionString);
+            SqlConnection connection = new SqlConnection(this.connectionString);
             try
             {
                 using (connection)
@@ -214,6 +277,7 @@ namespace FundooRepository.Repository
                     {
                         return true;
                     }
+
                     return false;
                 }
             }
@@ -229,9 +293,18 @@ namespace FundooRepository.Repository
                 }
             }
         }
+
+        /// <summary>
+        /// ArchiveNote.
+        /// </summary>
+        /// <param name="archiveNote">archiveNote.</param>
+        /// <param name="userID">userID.</param>
+        /// <param name="noteID">noteID.</param>
+        /// <returns>bool.</returns>
+        /// <exception cref="Exception">Exception.</exception>
         public bool ArchiveNote(bool archiveNote, int userID, int noteID)
         {
-            SqlConnection connection = new SqlConnection(connectionString);
+            SqlConnection connection = new SqlConnection(this.connectionString);
             try
             {
                 using (connection)
@@ -250,6 +323,7 @@ namespace FundooRepository.Repository
                     {
                         return true;
                     }
+
                     return false;
                 }
             }
@@ -265,9 +339,18 @@ namespace FundooRepository.Repository
                 }
             }
         }
+
+        /// <summary>
+        /// TrashNote.
+        /// </summary>
+        /// <param name="trashNote">trashNote.</param>
+        /// <param name="userID">userID.</param>
+        /// <param name="noteID">noteID.</param>
+        /// <returns>bool.</returns>
+        /// <exception cref="Exception">Exception.</exception>
         public bool TrashNote(bool trashNote, int userID, int noteID)
         {
-            SqlConnection connection = new SqlConnection(connectionString);
+            SqlConnection connection = new SqlConnection(this.connectionString);
             try
             {
                 using (connection)
@@ -286,6 +369,7 @@ namespace FundooRepository.Repository
                     {
                         return true;
                     }
+
                     return false;
                 }
             }
@@ -301,15 +385,23 @@ namespace FundooRepository.Repository
                 }
             }
         }
+
+        /// <summary>
+        /// Color.
+        /// </summary>
+        /// <param name="color">color.</param>
+        /// <param name="userID">userID.</param>
+        /// <param name="noteID">noteID.</param>
+        /// <returns>bool.</returns>
+        /// <exception cref="Exception">Exception.</exception>
         public bool Color(string color, int userID, int noteID)
         {
-            SqlConnection connection = new SqlConnection(connectionString);
+            SqlConnection connection = new SqlConnection(this.connectionString);
             try
             {
                 using (connection)
                 {
                     SqlCommand command = new SqlCommand("SPColor", connection);
-
 
                     command.CommandType = CommandType.StoredProcedure;
                     command.Parameters.AddWithValue("@UserID", userID);
@@ -323,6 +415,7 @@ namespace FundooRepository.Repository
                     {
                         return true;
                     }
+
                     return false;
                 }
             }
@@ -338,9 +431,18 @@ namespace FundooRepository.Repository
                 }
             }
         }
+
+        /// <summary>
+        /// Remainder.
+        /// </summary>
+        /// <param name="remainder">remainder.</param>
+        /// <param name="userID">userID.</param>
+        /// <param name="noteID">noteID.</param>
+        /// <returns>bool.</returns>
+        /// <exception cref="Exception">Exception.</exception>
         public bool Remainder(DateTime remainder, int userID, int noteID)
         {
-            SqlConnection connection = new SqlConnection(connectionString);
+            SqlConnection connection = new SqlConnection(this.connectionString);
             try
             {
                 using (connection)
@@ -359,6 +461,7 @@ namespace FundooRepository.Repository
                     {
                         return true;
                     }
+
                     return false;
                 }
             }
@@ -374,11 +477,12 @@ namespace FundooRepository.Repository
                 }
             }
         }
-        //public bool UploadImage(string filePath, int noteID, int userID)
-        //{
+
+        // public bool UploadImage(string filePath, int noteID, int userID)
+        // {
         //    SqlConnection connection = new SqlConnection(connectionString);
 
-        //    try
+        // try
         //    {
         //        Account account= new Account("dygwgjiug", "169716436645923", "5uefq_ETzI-wFz53UbvbDp7S-yk");
         //        Cloudinary cloudinary = new Cloudinary(account);
@@ -392,16 +496,16 @@ namespace FundooRepository.Repository
         //        {
         //            SqlCommand command = new SqlCommand("SPUploadImage", connection);
 
-        //            command.CommandType = CommandType.StoredProcedure;
+        // command.CommandType = CommandType.StoredProcedure;
         //            command.Parameters.AddWithValue("@UserID", userID);
         //            command.Parameters.AddWithValue("@NoteID", noteID);
         //            command.Parameters.AddWithValue("@Modified", DateTime.Now);
         //            command.Parameters.AddWithValue("@Image", uploadResult.Url.ToString());
 
-        //            connection.Open();
+        // connection.Open();
         //            int deleteOrNot = command.ExecuteNonQuery();
 
-        //            if (deleteOrNot >= 1)
+        // if (deleteOrNot >= 1)
         //            {
         //                return true;
         //            }
@@ -412,6 +516,6 @@ namespace FundooRepository.Repository
         //    {
         //        throw new Exception(ex.Message);
         //    }
-        //}
+        // }
     }
 }

@@ -1,18 +1,30 @@
-using FundooManager.Interface;
-using FundooManager.Manager;
-using FundooRepository.Interface;
-using FundooRepository.Repository;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.OpenApi.Models;
-using Microsoft.IdentityModel.Tokens;
-using System.Text;
-using NLog.Web;
-using NLog;
+// <copyright file="Program.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
 
 namespace FundooNoteApp
 {
+    using System.Text;
+    using FundooManager.Interface;
+    using FundooManager.Manager;
+    using FundooRepository.Interface;
+    using FundooRepository.Repository;
+    using MassTransit;
+    using Microsoft.AspNetCore.Authentication.JwtBearer;
+    using Microsoft.IdentityModel.Tokens;
+    using Microsoft.OpenApi.Models;
+    using NLog;
+    using NLog.Web;
+
+    /// <summary>
+    /// Program.
+    /// </summary>
     public class Program
     {
+        /// <summary>
+        /// Main.
+        /// </summary>
+        /// <param name="args">args.</param>
         public static void Main(string[] args)
         {
             var logger = NLog.LogManager.Setup().LoadConfigurationFromAppSettings().GetCurrentClassLogger();
@@ -20,8 +32,8 @@ namespace FundooNoteApp
             try
             {
                 var builder = WebApplication.CreateBuilder(args);
-                // Add services to the container.
 
+                // Add services to the container.
                 builder.Services.AddControllers();
                 builder.Services.AddSession(options =>
                 {
@@ -36,6 +48,21 @@ namespace FundooNoteApp
                 builder.Services.AddTransient<ILabelRepository, LabelRepository>();
                 builder.Services.AddTransient<ICollaboratorManager, CollaboratorManager>();
                 builder.Services.AddTransient<ICollaboratorRepository, CollaboratorRepository>();
+
+                builder.Services.AddMassTransit(x =>
+                {
+                    x.AddBus(provider => Bus.Factory.CreateUsingRabbitMq(config =>
+                    {
+                        config.UseHealthCheck(provider);
+                        config.Host(new Uri("rabbitmq://localhost"), h =>
+                        {
+                            h.Username("guest");
+                            h.Password("guest");
+                        });
+                    }));
+                });
+                builder.Services.AddMassTransitHostedService();
+
                 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
                 builder.Services.AddEndpointsApiExplorer();
                 builder.Services.AddSwaggerGen(s =>
@@ -53,8 +80,8 @@ namespace FundooNoteApp
                         Reference = new OpenApiReference
                         {
                             Id = JwtBearerDefaults.AuthenticationScheme,
-                            Type = ReferenceType.SecurityScheme
-                        }
+                            Type = ReferenceType.SecurityScheme,
+                        },
                     };
                     s.AddSecurityDefinition(jwtSecurityScheme.Reference.Id, jwtSecurityScheme);
 
@@ -91,11 +118,13 @@ namespace FundooNoteApp
                     app.UseSwagger();
                     app.UseSwaggerUI();
                 }
+
                 if (!app.Environment.IsDevelopment())
                 {
                     app.UseExceptionHandler("/Home/Error");
                     app.UseHsts();
                 }
+
                 app.UseAuthentication();
 
                 app.UseHttpsRedirection();
@@ -118,7 +147,7 @@ namespace FundooNoteApp
             }
             catch (Exception ex)
             {
-                logger.Error(ex,"Program Stopped Beacuse of Exception");
+                logger.Error(ex, "Program Stopped Beacuse of Exception");
                 throw;
             }
             finally
