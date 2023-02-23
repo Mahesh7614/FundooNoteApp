@@ -4,11 +4,14 @@
 
 namespace FundooNoteApp.Controllers
 {
+    using System.Text;
     using FundooManager.Interface;
     using FundooModel;
     using FundooNoteApp.Helpers;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
+    using Microsoft.Extensions.Caching.Distributed;
+    using Newtonsoft.Json;
 
     /// <summary>
     /// NotesController.
@@ -20,16 +23,19 @@ namespace FundooNoteApp.Controllers
     {
         private readonly INotesManager notesManager;
         private readonly ILogger<NotesController> logger;
+        private readonly IDistributedCache distributedCache;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="NotesController"/> class.
         /// </summary>
         /// <param name="notesManager">notesManager.</param>
         /// <param name="logger">logger.</param>
-        public NotesController(INotesManager notesManager, ILogger<NotesController> logger)
+        /// <param name="distributedCache">distributedCache.</param>
+        public NotesController(INotesManager notesManager, IDistributedCache distributedCache, ILogger<NotesController> logger)
         {
             this.notesManager = notesManager;
             this.logger = logger;
+            this.distributedCache = distributedCache;
             logger.LogDebug(1, "NLog injected into NoteController");
         }
 
@@ -44,9 +50,7 @@ namespace FundooNoteApp.Controllers
         {
             try
             {
-#pragma warning disable CS8602 // Dereference of a possibly null reference.
                 int userID = Convert.ToInt32(this.User.FindFirst("UserID").Value);
-#pragma warning restore CS8602 // Dereference of a possibly null reference.
                 NoteCreateModel notesData = this.notesManager.CreateNotes(notecreateModel, userID);
                 if (notesData != null)
                 {
@@ -74,9 +78,7 @@ namespace FundooNoteApp.Controllers
         {
             try
             {
-#pragma warning disable CS8602 // Dereference of a possibly null reference.
                 int userID = Convert.ToInt32(this.User.FindFirst("UserID").Value);
-#pragma warning restore CS8602 // Dereference of a possibly null reference.
                 List<NoteModel> notesData = this.notesManager.DisplayNotes(userID);
                 if (notesData != null)
                 {
@@ -106,9 +108,7 @@ namespace FundooNoteApp.Controllers
         {
             try
             {
-#pragma warning disable CS8602 // Dereference of a possibly null reference.
                 int userID = Convert.ToInt32(this.User.FindFirst("UserID").Value);
-#pragma warning restore CS8602 // Dereference of a possibly null reference.
                 UpdateNoteModel updateNoteData = this.notesManager.UpdateNotes(updateNote, userID, noteID);
                 if (updateNote != null)
                 {
@@ -314,6 +314,42 @@ namespace FundooNoteApp.Controllers
             {
                 this.logger.LogError("Getting an Exception for Note Remainder");
                 return this.NotFound(new { success = false, message = ex.Message });
+            }
+        }
+
+        [HttpGet]
+        [Route("GetAllNotesUsingRadisCache")]
+        public async Task<IActionResult> GetAllNotesUsingRadis()
+        {
+            try
+            {
+                var cacheKey = "NotesList";
+                List<NoteModel> noteList;
+                byte[] redisNoteList = await this.distributedCache.GetAsync(cacheKey);
+                if (redisNoteList != null)
+                {
+                    this.logger.LogDebug("Getting the list from Redis Cache");
+                    var serializedNoteList = Encoding.UTF8.GetString(redisNoteList);
+                    noteList = JsonConvert.DeserializeObject<List<NoteModel>>(serializedNoteList);
+                }
+                else
+                {
+                    this.logger.LogDebug("Setting the list to cache which is required for the first time");
+                    int userID = Convert.ToInt32(this.User.FindFirst("UserID").Value);
+                    noteList = this.notesManager.DisplayNotes(userID);
+                    var serializedNoteList = JsonConvert.SerializeObject(noteList);
+                    var newRedisNoteList = Encoding.UTF8.GetBytes(serializedNoteList);
+                    var options = new DistributedCacheEntryOptions().SetAbsoluteExpiration(DateTime.Now.AddMinutes(10)).SetSlidingExpiration(TimeSpan.FromMinutes(5));
+                    await this.distributedCache.SetAsync(cacheKey, newRedisNoteList, options);
+                }
+
+                this.logger.LogInformation("Got the notes list sucessfully from Redis");
+                return this.Ok(noteList);
+            }
+            catch (FundooAppException ex)
+            {
+                this.logger.LogCritical(ex, "Exception thrown...");
+                return this.BadRequest(new { sucess = false, message = ex.Message });
             }
         }
 

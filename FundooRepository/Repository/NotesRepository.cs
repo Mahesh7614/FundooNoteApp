@@ -130,9 +130,7 @@ namespace FundooRepository.Repository
                         return listNote;
                     }
 
-#pragma warning disable CS8603 // Possible null reference return.
                     return null;
-#pragma warning restore CS8603 // Possible null reference return.
                 }
             }
             catch (Exception ex)

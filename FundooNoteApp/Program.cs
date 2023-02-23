@@ -32,14 +32,20 @@ namespace FundooNoteApp
             try
             {
                 var builder = WebApplication.CreateBuilder(args);
-
-                // Add services to the container.
-                builder.Services.AddControllers();
+                ConfigurationManager configuration = builder.Configuration;
+                builder.Services.AddStackExchangeRedisCache(
+                options =>
+                    {
+                        options.Configuration = configuration["RedisCacheUrl"];
+                    });
                 builder.Services.AddSession(options =>
                 {
                     options.IdleTimeout = TimeSpan.FromHours(1);
                 });
                 builder.Services.AddDistributedMemoryCache();
+
+                // Add services to the container.
+                builder.Services.AddControllers();
                 builder.Services.AddTransient<IUserRepository, UserRepository>();
                 builder.Services.AddTransient<IUserManager, UserManager>();
                 builder.Services.AddTransient<INotesRepository, NotesRepository>();
